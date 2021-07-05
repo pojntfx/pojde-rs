@@ -22,6 +22,7 @@ struct Opts {
 enum SubCommand {
     List(List),
     Start(Start),
+    Stop(Stop),
 }
 
 #[derive(Clap)]
@@ -39,6 +40,16 @@ struct List {}
     about = "Start instance(s).",
 )]
 struct Start {
+    names: Vec<String>,
+}
+
+#[derive(Clap)]
+#[clap(
+    version = crate_version!(),
+    author = crate_authors!(),
+    about = "Stop instance(s).",
+)]
+struct Stop {
     names: Vec<String>,
 }
 
@@ -83,10 +94,31 @@ async fn main() {
                     .await;
 
                 match res {
-                    Ok(_) => return,
+                    Ok(_) => println!("Instance started."),
                     Err(error) => match error {
                         bollard::errors::Error::DockerResponseNotModifiedError { message: _ } => {
                             println!("Instance already running.");
+                        }
+                        other_error => {
+                            panic!("Unexpected error during instance start: {:?}", other_error)
+                        }
+                    },
+                }
+            }
+        }
+        SubCommand::Stop(c) => {
+            for name in c
+                .names
+                .iter()
+                .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
+            {
+                let res = docker.stop_container(&name, None).await;
+
+                match res {
+                    Ok(_) => println!("Instance stopped."),
+                    Err(error) => match error {
+                        bollard::errors::Error::DockerResponseNotModifiedError { message: _ } => {
+                            println!("Instance already stopped.");
                         }
                         other_error => {
                             panic!("Unexpected error during instance start: {:?}", other_error)
