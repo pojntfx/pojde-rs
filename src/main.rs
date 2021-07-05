@@ -1,4 +1,7 @@
-use bollard::{container::ListContainersOptions, Docker};
+use bollard::{
+    container::{ListContainersOptions, StartContainerOptions},
+    Docker,
+};
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use maplit::hashmap;
 
@@ -18,6 +21,7 @@ struct Opts {
 #[derive(Clap)]
 enum SubCommand {
     List(List),
+    Start(Start),
 }
 
 #[derive(Clap)]
@@ -27,6 +31,16 @@ enum SubCommand {
     about = "List all instances.",
 )]
 struct List {}
+
+#[derive(Clap)]
+#[clap(
+    version = crate_version!(),
+    author = crate_authors!(),
+    about = "Start instance(s).",
+)]
+struct Start {
+    names: Vec<String>,
+}
 
 #[tokio::main]
 async fn main() {
@@ -56,6 +70,29 @@ async fn main() {
                         .trim_start_matches("/")
                         .trim_start_matches(POJDE_DOCKER_PREFIX)
                 )
+            }
+        }
+        SubCommand::Start(c) => {
+            for name in c
+                .names
+                .iter()
+                .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
+            {
+                let res = docker
+                    .start_container(&name, None::<StartContainerOptions<String>>)
+                    .await;
+
+                match res {
+                    Ok(_) => return,
+                    Err(error) => match error {
+                        bollard::errors::Error::DockerResponseNotModifiedError { message: _ } => {
+                            println!("Instance already running.");
+                        }
+                        other_error => {
+                            panic!("Unexpected error during instance start: {:?}", other_error)
+                        }
+                    },
+                }
             }
         }
     }
