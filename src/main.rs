@@ -23,6 +23,7 @@ enum SubCommand {
     List(List),
     Start(Start),
     Stop(Stop),
+    Restart(Restart),
 }
 
 #[derive(Clap)]
@@ -50,6 +51,16 @@ struct Start {
     about = "Stop instance(s).",
 )]
 struct Stop {
+    names: Vec<String>,
+}
+
+#[derive(Clap)]
+#[clap(
+    version = crate_version!(),
+    author = crate_authors!(),
+    about = "Restart instance(s).",
+)]
+struct Restart {
     names: Vec<String>,
 }
 
@@ -121,9 +132,23 @@ async fn main() {
                             println!("Instance already stopped.");
                         }
                         other_error => {
-                            panic!("Unexpected error during instance start: {:?}", other_error)
+                            panic!("Unexpected error during instance stop: {:?}", other_error)
                         }
                     },
+                }
+            }
+        }
+        SubCommand::Restart(c) => {
+            for name in c
+                .names
+                .iter()
+                .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
+            {
+                let res = docker.restart_container(&name, None).await;
+
+                match res {
+                    Ok(_) => println!("Instance restarted."),
+                    Err(error) => panic!("Unexpected error during instance restart: {:?}", error),
                 }
             }
         }
