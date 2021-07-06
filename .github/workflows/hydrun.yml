@@ -12,8 +12,8 @@ jobs:
     strategy:
       matrix:
         project:
-          - { dir: ., os: "carlosedp/debian:sid", arch: amd64 }
-          - { dir: ., os: "carlosedp/debian:sid", arch: arm64 }
+          - { dir: ., os: debian, arch: amd64 }
+          - { dir: ., os: debian, arch: arm64 }
           - { dir: ., os: "carlosedp/debian:sid", arch: riscv64 }
 
     steps:
