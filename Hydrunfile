@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Install native dependencies
+apt update
+apt install -y curl make sudo build-essential
+
+# Fix certificate authorities on armv7
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
+. /root/.cargo/env
+
+# Install dependencies
+USER=root make depend
+
+# Start development or make release
+if [ "$1" = 'dev' ]; then
+    make dev
+else
+    make release
+fi
