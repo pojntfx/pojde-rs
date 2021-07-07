@@ -1,11 +1,15 @@
+use openssh::{KnownHosts, Session};
+use std::str::FromStr;
+
 use bollard::{
-    container::{ListContainersOptions, StartContainerOptions},
+    container::{InspectContainerOptions, ListContainersOptions, StartContainerOptions},
     Docker,
 };
 use clap::{crate_authors, crate_description, crate_version, Clap};
 use maplit::hashmap;
 
 const POJDE_DOCKER_PREFIX: &str = "pojde-";
+const SSH_PORT: &str = "8005/tcp";
 
 #[derive(Clap)]
 #[clap(
@@ -24,6 +28,7 @@ enum SubCommand {
     Start(Start),
     Stop(Stop),
     Restart(Restart),
+    Forward(Forward),
 }
 
 #[derive(Clap)]
@@ -62,6 +67,38 @@ struct Stop {
 )]
 struct Restart {
     names: Vec<String>,
+}
+
+#[derive(Clap)]
+#[clap(
+    version = crate_version!(),
+    author = crate_authors!(),
+    about = "Forward port(s) to or from an instance.",
+)]
+struct Forward {
+    #[clap(about = "Name of the instance to forward from or to.")]
+    name: String,
+    #[clap(about = "Local address:remote address to forward, i.e. localhost:5000:localhost:5000")]
+    address: Vec<String>,
+    #[clap(short, long, about = "Peer to forward to.", possible_values = &["local","remote"], default_value = "local")]
+    direction: Direction,
+}
+
+enum Direction {
+    Local,
+    Remote,
+}
+
+impl FromStr for Direction {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "local" => Ok(Self::Local),
+            "remote" => Ok(Self::Remote),
+            _ => Err("no match"),
+        }
+    }
 }
 
 #[tokio::main]
@@ -151,6 +188,20 @@ async fn main() {
                     Err(error) => panic!("Unexpected error during instance restart: {:?}", error),
                 }
             }
+        }
+        SubCommand::Forward(c) => {
+            let container = docker
+                .inspect_container(&(POJDE_DOCKER_PREFIX.to_owned() + &c.name), None)
+                .await;
+
+            let ports = container.unwrap().network_settings.unwrap().ports.unwrap();
+
+            let shared_port = ports.get("8005/tcp").unwrap().as_ref().unwrap()[0]
+                .host_port
+                .as_ref()
+                .unwrap();
+
+            println!("{}", shared_port);
         }
     }
 }
