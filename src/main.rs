@@ -5,17 +5,22 @@ use bollard::{
     container::{InspectContainerOptions, ListContainersOptions, StartContainerOptions},
     Docker,
 };
-use clap::{crate_authors, crate_description, crate_version, Clap};
+use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use maplit::hashmap;
+use owo_colors::OwoColorize;
+use tabled::{Column, Format, Modify, Style, Table, Tabled};
 
 const POJDE_DOCKER_PREFIX: &str = "pojde-";
 const SSH_PORT: &str = "8005/tcp";
+const CONTAINER_RUNNING_STATE: &str = "running";
+const CONTAINER_EXITED_STATE: &str = "exited";
 
 #[derive(Clap)]
 #[clap(
     version = crate_version!(),
     author = crate_authors!(),
     about = crate_description!(),
+    setting = AppSettings::ColoredHelp,
 )]
 struct Opts {
     #[clap(subcommand)]
@@ -33,17 +38,15 @@ enum SubCommand {
 
 #[derive(Clap)]
 #[clap(
-    version = crate_version!(),
-    author = crate_authors!(),
     about = "List all instances.",
+    setting = AppSettings::ColoredHelp,
 )]
 struct List {}
 
 #[derive(Clap)]
 #[clap(
-    version = crate_version!(),
-    author = crate_authors!(),
     about = "Start instance(s).",
+    setting = AppSettings::ColoredHelp,
 )]
 struct Start {
     names: Vec<String>,
@@ -51,9 +54,8 @@ struct Start {
 
 #[derive(Clap)]
 #[clap(
-    version = crate_version!(),
-    author = crate_authors!(),
     about = "Stop instance(s).",
+    setting = AppSettings::ColoredHelp,
 )]
 struct Stop {
     names: Vec<String>,
@@ -61,9 +63,8 @@ struct Stop {
 
 #[derive(Clap)]
 #[clap(
-    version = crate_version!(),
-    author = crate_authors!(),
     about = "Restart instance(s).",
+    setting = AppSettings::ColoredHelp,
 )]
 struct Restart {
     names: Vec<String>,
@@ -71,9 +72,8 @@ struct Restart {
 
 #[derive(Clap)]
 #[clap(
-    version = crate_version!(),
-    author = crate_authors!(),
     about = "Forward port(s) to or from an instance.",
+    setting = AppSettings::ColoredHelp,
 )]
 struct Forward {
     #[clap(about = "Name of the instance to forward from or to.")]
@@ -101,6 +101,16 @@ impl FromStr for Direction {
     }
 }
 
+#[derive(Tabled)]
+struct InstanceColumn {
+    #[header("NAME")]
+    name: String,
+    #[header("STATUS")]
+    status: String,
+    #[header("PORTS")]
+    ports: String,
+}
+
 #[tokio::main]
 async fn main() {
     let opts = Opts::parse();
@@ -120,16 +130,50 @@ async fn main() {
                 .await
                 .unwrap();
 
-            for container in containers {
-                let raw_name = &container.names.unwrap()[0];
+            let containers_in_table = containers.iter().map(|c| {
+                let mut ports: Vec<i64> = c
+                    .ports
+                    .as_ref()
+                    .unwrap()
+                    .iter()
+                    .map(|p| p.public_port.unwrap())
+                    .collect();
+                ports.sort_by(|a, b| a.cmp(b));
 
-                println!(
-                    "{}",
-                    raw_name
-                        .trim_start_matches("/")
-                        .trim_start_matches(POJDE_DOCKER_PREFIX)
-                )
-            }
+                let name = c.names.as_ref().unwrap()[0]
+                    .trim_start_matches("/")
+                    .trim_start_matches(POJDE_DOCKER_PREFIX)
+                    .to_string();
+                let status = c.state.as_ref().unwrap().to_string();
+
+                let ports = match (ports.first(), ports.last()) {
+                    (Some(first_port), Some(last_port)) => {
+                        first_port.to_string() + "-" + &last_port.to_string()
+                    }
+                    _ => String::new(),
+                };
+
+                InstanceColumn {
+                    name,
+                    status,
+                    ports,
+                }
+            });
+
+            print!(
+                "{}",
+                Table::new(containers_in_table)
+                    .with(Style::pseudo_clean())
+                    .with(Modify::new(Column(..1)).with(Format(|s| s.yellow().to_string())))
+                    .with(Modify::new(Column(1..2)).with(Format(|s| {
+                        if s == CONTAINER_EXITED_STATE {
+                            return s.red().to_string();
+                        }
+
+                        s.green().to_string()
+                    })))
+                    .with(Modify::new(Column(2..)).with(Format(|s| s.cyan().to_string())))
+            );
         }
         SubCommand::Start(c) => {
             for name in c
