@@ -48,15 +48,18 @@ jobs:
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
         run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.target }}\" PKGS=\"${{ matrix.project.pkgs }}\" CROSS_COMPILER=\"${{ matrix.project.cc }}\" ./Hydrunfile"'
-      - name: Fix permissions for output
+      - name: Fix permissions for output and copy to tmp dir
         working-directory: ${{ matrix.project.dir }}
-        run: sudo chown -R $USER target
+        run: |
+          sudo chown -R $USER target
+          mkdir -p /tmp/out
+          cp ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/{${{ join(matrix.project.bins,',') }}} /tmp/out
       - name: Upload output
         uses: actions/upload-artifact@v2
         with:
           name: staging-${{ matrix.project.dir }}
           path: |
-            ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/{${{ join(matrix.project.bins,',') }}}
+            /tmp/out/*
 
   publish-linux:
     runs-on: ubuntu-latest
