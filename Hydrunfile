@@ -11,6 +11,30 @@ export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | bash -s -- -y
 . /root/.cargo/env
 
+# Set up Rust for cross-compilation
+cat <<EOT >/root/.cargo/config
+[target.x86_64-unknown-linux-gnu]
+linker = "x86_64-linux-gnu-gcc"
+
+[target.aarch64-unknown-linux-gnu]
+linker = "aarch64-linux-gnu-gcc"
+
+[target.riscv64gc-unknown-linux-gnu]
+linker = "riscv64-linux-gnu-gcc"
+EOT
+
+# Install dependencies for C cross-compilation
+if [ "${CARGO_BUILD_TARGET}" = 'x86_64-unknown-linux-gnu' ]; then
+    apt install -y gcc-x86-64-linux-gnu
+    rustup target add x86_64-unknown-linux-gnu
+elif [ "${CARGO_BUILD_TARGET}" = 'aarch64-unknown-linux-gnu' ]; then
+    apt install -y gcc-aarch64-linux-gnu
+    rustup target add aarch64-unknown-linux-gnu
+else
+    apt install -y gcc-riscv64-linux-gnu
+    rustup target add riscv64gc-unknown-linux-gnu
+fi
+
 # Install dependencies
 USER=root make depend
 
