@@ -12,9 +12,21 @@ jobs:
     strategy:
       matrix:
         project:
-          - { dir: ., os: debian, arch: amd64 }
-          - { dir: ., os: debian, arch: arm64 }
-          - { dir: ., os: "carlosedp/debian:sid", arch: riscv64 }
+          - dir: .
+            os: debian
+            arch: amd64
+            target: x86_64-unknown-linux-gnu
+            bins: [pojdectl]
+          - dir: .
+            os: debian
+            arch: amd64
+            target: aarch64-unknown-linux-gnu
+            bins: [pojdectl]
+          - dir: .
+            os: debian
+            arch: amd64
+            target: riscv64gc-unknown-linux-gnu
+            bins: [pojdectl]
 
     steps:
       - name: Checkout
@@ -29,7 +41,7 @@ jobs:
           sudo install /tmp/hydrun /usr/local/bin
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
-        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} ./Hydrunfile
+        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=${{ matrix.project.target }} ./Hydrunfile"'
       - name: Fix permissions for output
         working-directory: ${{ matrix.project.dir }}
         run: sudo chown -R $USER out
@@ -38,7 +50,7 @@ jobs:
         with:
           name: staging-${{ matrix.project.dir }}
           path: |
-            ${{ matrix.project.dir }}/out/release/*
+            ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/{${{ join(matrix.project.bins,',') }}}
 
   publish-linux:
     runs-on: ubuntu-latest
