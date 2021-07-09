@@ -31,6 +31,14 @@ jobs:
           - dir: .
             os: debian
             arch: amd64
+            target: armv7-unknown-linux-gnueabihf
+            pkgs: gcc-arm-linux-gnueabihf
+            cc: arm-linux-gnueabihf-gcc
+            bins: [pojdectl-rs]
+            suffix: .linux-armv7l
+          - dir: .
+            os: debian
+            arch: amd64
             target: riscv64gc-unknown-linux-gnu
             pkgs: gcc-riscv64-linux-gnu
             cc: riscv64-linux-gnu-gcc
@@ -56,7 +64,7 @@ jobs:
         run: |
           sudo chown -R $USER .
           mkdir -p /tmp/out
-          for file in {{ join(matrix.project.bins,' ') }}; do
+          for file in ${{ join(matrix.project.bins,' ') }}; do
             cp $file /tmp/out/$file${{ matrix.project.suffix }}
           done
       - name: Upload output
