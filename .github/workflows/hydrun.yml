@@ -18,21 +18,18 @@ jobs:
             target: x86_64-unknown-linux-gnu
             pkgs: gcc-x86-64-linux-gnu
             cc: x86_64-linux-gnu-gcc
-            bins: [pojdectl]
           - dir: .
             os: debian
             arch: amd64
             target: aarch64-unknown-linux-gnu
             pkgs: gcc-aarch64-linux-gnu
             cc: aarch64-linux-gnu-gcc
-            bins: [pojdectl]
           - dir: .
             os: debian
             arch: amd64
             target: riscv64gc-unknown-linux-gnu
             pkgs: gcc-riscv64-linux-gnu
             cc: riscv64-linux-gnu-gcc
-            bins: [pojdectl]
 
     steps:
       - name: Checkout
@@ -48,18 +45,18 @@ jobs:
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
         run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.target }}\" PKGS=\"${{ matrix.project.pkgs }}\" CROSS_COMPILER=\"${{ matrix.project.cc }}\" ./Hydrunfile"'
-      - name: Fix permissions for output and copy to tmp dir
+      - name: Fix permissions for output
         working-directory: ${{ matrix.project.dir }}
-        run: |
-          sudo chown -R $USER target
-          mkdir -p /tmp/out
-          cp ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/{${{ join(matrix.project.bins,',') }}} /tmp/out
+        run: sudo chown -R $USER target
       - name: Upload output
         uses: actions/upload-artifact@v2
         with:
           name: staging-${{ matrix.project.dir }}
           path: |
-            /tmp/out/*
+            ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/.*
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*.d
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*/
 
   publish-linux:
     runs-on: ubuntu-latest
