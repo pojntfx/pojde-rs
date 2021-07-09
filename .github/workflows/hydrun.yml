@@ -56,7 +56,10 @@ jobs:
             ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*
             !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/.*
             !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*.d
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*/
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/build
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/deps
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/examples
+            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/incremental
 
   publish-linux:
     runs-on: ubuntu-latest
