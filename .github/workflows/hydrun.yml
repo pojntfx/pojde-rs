@@ -50,7 +50,7 @@ jobs:
             target: x86_64-pc-windows-gnu
             pkgs: gcc-mingw-w64
             cc: x86_64-w64-mingw32-gcc
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs.exe]
             suffix: .windows-x86_64.exe
 
     steps:
