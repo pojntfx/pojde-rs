@@ -52,6 +52,22 @@ jobs:
             cc: x86_64-w64-mingw32-gcc
             bins: [pojdectl-rs.exe]
             suffix: .windows-x86_64.exe
+          - dir: .
+            os: joseluisq/rust-linux-darwin-builder
+            arch: amd64
+            target: x86_64-apple-darwin
+            pkgs: ""
+            cc: x86_64-apple-darwin20.2-clang
+            bins: [pojdectl-rs]
+            suffix: .darwin-x86_64
+          - dir: .
+            os: joseluisq/rust-linux-darwin-builder
+            arch: amd64
+            target: aarch64-apple-darwin
+            pkgs: ""
+            cc: aarch64-apple-darwin20.2-clang
+            bins: [pojdectl-rs]
+            suffix: .darwin-aarch64
 
     steps:
       - name: Checkout
