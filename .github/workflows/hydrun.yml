@@ -18,18 +18,24 @@ jobs:
             target: x86_64-unknown-linux-gnu
             pkgs: gcc-x86-64-linux-gnu
             cc: x86_64-linux-gnu-gcc
+            bins: [pojdectl-rs]
+            suffix: .linux-x86_64
           - dir: .
             os: debian
             arch: amd64
             target: aarch64-unknown-linux-gnu
             pkgs: gcc-aarch64-linux-gnu
             cc: aarch64-linux-gnu-gcc
+            bins: [pojdectl-rs]
+            suffix: .linux-aarch64
           - dir: .
             os: debian
             arch: amd64
             target: riscv64gc-unknown-linux-gnu
             pkgs: gcc-riscv64-linux-gnu
             cc: riscv64-linux-gnu-gcc
+            bins: [pojdectl-rs]
+            suffix: .linux-riscv64
 
     steps:
       - name: Checkout
@@ -45,21 +51,20 @@ jobs:
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
         run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.target }}\" PKGS=\"${{ matrix.project.pkgs }}\" CROSS_COMPILER=\"${{ matrix.project.cc }}\" ./Hydrunfile"'
-      - name: Fix permissions for output
-        working-directory: ${{ matrix.project.dir }}
-        run: sudo chown -R $USER target
+      - name: Fix permissions for output and copy to temp dir
+        working-directory: ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release
+        run: |
+          sudo chown -R $USER .
+          mkdir -p /tmp/out
+          for file in {{ join(matrix.project.bins,' ') }}; do
+            cp $file /tmp/out/$file${{ matrix.project.suffix }}
+          done
       - name: Upload output
         uses: actions/upload-artifact@v2
         with:
           name: staging-${{ matrix.project.dir }}
           path: |
-            ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/.*
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/*.d
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/build
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/deps
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/examples
-            !${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release/incremental
+            /tmp/out/*
 
   publish-linux:
     runs-on: ubuntu-latest
