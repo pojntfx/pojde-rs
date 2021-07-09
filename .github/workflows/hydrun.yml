@@ -44,6 +44,14 @@ jobs:
             cc: riscv64-linux-gnu-gcc
             bins: [pojdectl-rs]
             suffix: .linux-riscv64
+          - dir: .
+            os: debian
+            arch: amd64
+            target: x86_64-pc-windows-gnu
+            pkgs: gcc-mingw-w64
+            cc: x86_64-w64-mingw32-gcc
+            bins: [pojdectl-rs]
+            suffix: .windows-x86_64.exe
 
     steps:
       - name: Checkout
