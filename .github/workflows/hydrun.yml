@@ -16,16 +16,19 @@ jobs:
             os: debian
             arch: amd64
             target: x86_64-unknown-linux-gnu
+            cc: gcc-x86-64-linux-gnu
             bins: [pojdectl]
           - dir: .
             os: debian
             arch: amd64
             target: aarch64-unknown-linux-gnu
+            cc: gcc-aarch64-linux-gnu
             bins: [pojdectl]
           - dir: .
             os: debian
             arch: amd64
             target: riscv64gc-unknown-linux-gnu
+            cc: gcc-riscv64-linux-gnu
             bins: [pojdectl]
 
     steps:
@@ -41,10 +44,10 @@ jobs:
           sudo install /tmp/hydrun /usr/local/bin
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
-        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=${{ matrix.project.target }} ./Hydrunfile"'
+        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=${{ matrix.project.target }} CROSS_COMPILER=${{ matrix.project.cc }} ./Hydrunfile"'
       - name: Fix permissions for output
         working-directory: ${{ matrix.project.dir }}
-        run: sudo chown -R $USER out
+        run: sudo chown -R $USER target
       - name: Upload output
         uses: actions/upload-artifact@v2
         with:
