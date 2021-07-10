@@ -1,5 +1,5 @@
 use openssh::{KnownHosts, Session};
-use std::str::FromStr;
+use std::{io, str::FromStr};
 
 use bollard::{
     container::{InspectContainerOptions, ListContainersOptions, StartContainerOptions},
@@ -8,6 +8,7 @@ use bollard::{
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use maplit::hashmap;
 use owo_colors::OwoColorize;
+use spinners::{Spinner, Spinners};
 use tabled::{Column, Format, Modify, Style, Table, Tabled};
 
 const POJDE_DOCKER_PREFIX: &str = "pojde-";
@@ -181,15 +182,22 @@ async fn main() {
                 .iter()
                 .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
             {
+                let sp = Spinner::new(Spinners::Dots12, "Starting instance ...".into());
+
                 let res = docker
                     .start_container(&name, None::<StartContainerOptions<String>>)
                     .await;
 
+                sp.stop();
+                println!();
+
                 match res {
-                    Ok(_) => println!("Instance started."),
+                    Ok(_) => {
+                        println!("⬆️  Started instance.");
+                    }
                     Err(error) => match error {
                         bollard::errors::Error::DockerResponseNotModifiedError { message: _ } => {
-                            println!("Instance already running.");
+                            println!("Instance already started.");
                         }
                         other_error => {
                             panic!("Unexpected error during instance start: {:?}", other_error)
@@ -204,10 +212,15 @@ async fn main() {
                 .iter()
                 .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
             {
+                let sp = Spinner::new(Spinners::Dots12, "Stopping instance ...".into());
+
                 let res = docker.stop_container(&name, None).await;
 
+                sp.stop();
+                println!();
+
                 match res {
-                    Ok(_) => println!("Instance stopped."),
+                    Ok(_) => println!("⬇️  Stopped instance."),
                     Err(error) => match error {
                         bollard::errors::Error::DockerResponseNotModifiedError { message: _ } => {
                             println!("Instance already stopped.");
@@ -225,10 +238,15 @@ async fn main() {
                 .iter()
                 .map(|name| POJDE_DOCKER_PREFIX.to_owned() + name)
             {
+                let sp = Spinner::new(Spinners::Dots12, "Restarting instance ...".into());
+
                 let res = docker.restart_container(&name, None).await;
 
+                sp.stop();
+                println!();
+
                 match res {
-                    Ok(_) => println!("Instance restarted."),
+                    Ok(_) => println!("🔃 Restarted instance."),
                     Err(error) => panic!("Unexpected error during instance restart: {:?}", error),
                 }
             }
