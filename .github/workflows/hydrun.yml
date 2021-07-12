@@ -59,7 +59,7 @@ jobs:
             pkgs: ""
             cc: x86_64-apple-darwin20.2-clang
             bins: [pojdectl-rs]
-            suffix: .darwin-x86_64
+            suffix: .macos-x86_64
           - dir: .
             os: joseluisq/rust-linux-darwin-builder
             arch: amd64
@@ -67,7 +67,7 @@ jobs:
             pkgs: ""
             cc: aarch64-apple-darwin20.2-clang
             bins: [pojdectl-rs]
-            suffix: .darwin-aarch64
+            suffix: .macos-aarch64
 
     steps:
       - name: Checkout

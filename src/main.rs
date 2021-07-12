@@ -1,6 +1,10 @@
+use std::env::consts;
 use std::str::FromStr;
 
-use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
+use clap::{crate_authors, crate_description, crate_name, crate_version, AppSettings, Clap};
+use self_update;
+
+static REPO_OWNER: &str = "pojntfx";
 
 #[derive(Clap)]
 #[clap(
@@ -11,16 +15,15 @@ use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 )]
 struct Opts {
     #[clap(subcommand)]
-    topics: Topics,
+    subcmd: Topics,
 
     #[clap(
         short,
         long,
         about = "Remote host to execute on, in format user@host:port",
-        required = false,
         global = true
     )]
-    node: String,
+    node: Option<String>,
 }
 
 #[derive(Clap)]
@@ -277,7 +280,44 @@ struct ResetCA {
     force: bool,
 }
 
-#[tokio::main]
-async fn main() {
-    Opts::parse();
+fn main() -> Result<(), Box<dyn (::std::error::Error)>> {
+    let opts = Opts::parse();
+
+    match opts.subcmd {
+        Topics::Modify(_) => todo!(),
+        Topics::Cycle(_) => todo!(),
+        Topics::Util(_) => todo!(),
+        Topics::Misc(t) => match t.subcmd {
+            MiscellaneousCommands::UpgradePojdectl(_) => {
+                let bin_suffix = match (consts::OS, consts::ARCH) {
+                    ("linux", "x86_64") => "linux-x86_64",
+                    ("linux", "aarch64") => "linux-aarch64",
+                    ("linux", "arm") => "linux-armv7l",
+                    ("linux", "riscv64") => "linux-riscv64",
+                    ("windows", "x86_64") => "exe.windows-x86_64",
+                    ("macos", "x86_64") => "macos-x86_64",
+                    ("macos", "aarch64") => "macos-aarch64",
+                    (os, arch) => panic!(
+                        "Can't upgrade, unsupported OS `{}` or architecture `{}`",
+                        os, arch
+                    ),
+                };
+
+                let status = self_update::backends::github::Update::configure()
+                    .repo_owner(REPO_OWNER)
+                    .repo_name(crate_name!())
+                    .bin_name(&(crate_name!().to_owned() + bin_suffix))
+                    .show_download_progress(true)
+                    .current_version(crate_version!())
+                    .build()?
+                    .update()?;
+
+                println!("Upgrade status: `{}`", status.version());
+            }
+            MiscellaneousCommands::GetCACert(_) => todo!(),
+            MiscellaneousCommands::ResetCA(_) => todo!(),
+        },
+    }
+
+    Ok(())
 }
