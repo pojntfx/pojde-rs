@@ -12,6 +12,15 @@ use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 struct Opts {
     #[clap(subcommand)]
     topics: Topics,
+
+    #[clap(
+        short,
+        long,
+        about = "Remote host to execute on, in format user@host:port",
+        required = false,
+        global = true
+    )]
+    node: String,
 }
 
 #[derive(Clap)]
