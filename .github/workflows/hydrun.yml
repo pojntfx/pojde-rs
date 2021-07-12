@@ -62,14 +62,15 @@ jobs:
             cc: x86_64-apple-darwin20.2-clang
             bins: [pojdectl-rs]
             suffix: .macos-x86_64
-          - dir: .
-            os: joseluisq/rust-linux-darwin-builder
-            arch: amd64
-            target: aarch64-apple-darwin
-            pkgs: ""
-            cc: aarch64-apple-darwin20.2-clang
-            bins: [pojdectl-rs]
-            suffix: .macos-aarch64
+          # TODO: Re-enable once https://github.com/briansmith/ring/issues/813#issuecomment-738210836 is fixed
+          # - dir: .
+          #   os: joseluisq/rust-linux-darwin-builder
+          #   arch: amd64
+          #   target: aarch64-apple-darwin
+          #   pkgs: ""
+          #   cc: aarch64-apple-darwin20.2-clang
+          #   bins: [pojdectl-rs]
+          #   suffix: .macos-aarch64
 
     steps:
       - name: Checkout
