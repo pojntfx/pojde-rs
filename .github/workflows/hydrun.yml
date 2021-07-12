@@ -16,7 +16,7 @@ jobs:
             os: debian
             arch: amd64
             target: x86_64-unknown-linux-musl
-            pkgs: ""
+            pkgs: gcc-x86-64-linux-gnu
             cc: x86_64-linux-gnu-gcc
             bins: [pojdectl-rs]
             suffix: .linux-x86_64
@@ -24,7 +24,7 @@ jobs:
             os: debian
             arch: amd64
             target: aarch64-unknown-linux-musl
-            pkgs: ""
+            pkgs: gcc-aarch64-linux-gnu
             cc: aarch64-linux-gnu-gcc
             bins: [pojdectl-rs]
             suffix: .linux-aarch64
@@ -32,7 +32,7 @@ jobs:
             os: debian
             arch: amd64
             target: armv7-unknown-linux-musleabihf
-            pkgs: ""
+            pkgs: gcc-arm-linux-gnueabihf
             cc: arm-linux-gnueabihf-gcc
             bins: [pojdectl-rs]
             suffix: .linux-armv7l
