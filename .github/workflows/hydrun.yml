@@ -36,14 +36,16 @@ jobs:
             cc: arm-linux-gnueabihf-gcc
             bins: [pojdectl-rs]
             suffix: .linux-armv7l
-          - dir: .
-            os: debian
-            arch: amd64
-            target: riscv64gc-unknown-linux-gnu
-            pkgs: gcc-riscv64-linux-gnu
-            cc: riscv64-linux-gnu-gcc
-            bins: [pojdectl-rs]
-            suffix: .linux-riscv64
+          # TODO: Re-enable once Ring releases https://github.com/briansmith/ring/pull/1174
+          # TODO: Switch to musl as soon as Rust releases the 2021 edition and adds a RISC-V musl target
+          # - dir: .
+          #   os: debian
+          #   arch: amd64
+          #   target: riscv64gc-unknown-linux-gnu
+          #   pkgs: gcc-riscv64-linux-gnu
+          #   cc: riscv64-linux-gnu-gcc
+          #   bins: [pojdectl-rs]
+          #   suffix: .linux-riscv64
           - dir: .
             os: debian
             arch: amd64
