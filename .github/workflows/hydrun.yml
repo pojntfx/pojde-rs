@@ -16,24 +16,27 @@ jobs:
             os: debian
             arch: amd64
             target: x86_64-unknown-linux-musl
-            pkgs: gcc-x86-64-linux-gnu
+            pkgs: clang llvm gcc-x86-64-linux-gnu
             cc: x86_64-linux-gnu-gcc
+            target_cc: clang
             bins: [pojdectl-rs]
             suffix: .linux-x86_64
           - dir: .
             os: debian
             arch: amd64
             target: aarch64-unknown-linux-musl
-            pkgs: gcc-aarch64-linux-gnu
+            pkgs: clang llvm gcc-aarch64-linux-gnu
             cc: aarch64-linux-gnu-gcc
+            target_cc: clang
             bins: [pojdectl-rs]
             suffix: .linux-aarch64
           - dir: .
             os: debian
             arch: amd64
             target: armv7-unknown-linux-musleabihf
-            pkgs: gcc-arm-linux-gnueabihf
+            pkgs: clang llvm gcc-arm-linux-gnueabihf
             cc: arm-linux-gnueabihf-gcc
+            target_cc: clang
             bins: [pojdectl-rs]
             suffix: .linux-armv7l
           # TODO: Re-enable once Ring releases https://github.com/briansmith/ring/pull/1174
@@ -50,27 +53,29 @@ jobs:
             os: debian
             arch: amd64
             target: x86_64-pc-windows-gnu
-            pkgs: gcc-mingw-w64
+            pkgs: clang llvm gcc-mingw-w64
             cc: x86_64-w64-mingw32-gcc
+            target_cc: clang
             bins: [pojdectl-rs.exe]
             suffix: .windows-x86_64.exe
           - dir: .
             os: joseluisq/rust-linux-darwin-builder
             arch: amd64
             target: x86_64-apple-darwin
-            pkgs: ""
+            pkgs: gcc-multilib g++-multilib
             cc: x86_64-apple-darwin20.2-clang
+            target_cc: x86_64-apple-darwin20.2-clang
             bins: [pojdectl-rs]
             suffix: .macos-x86_64
-          # TODO: Re-enable once https://github.com/briansmith/ring/issues/813#issuecomment-738210836 is fixed
-          # - dir: .
-          #   os: joseluisq/rust-linux-darwin-builder
-          #   arch: amd64
-          #   target: aarch64-apple-darwin
-          #   pkgs: ""
-          #   cc: aarch64-apple-darwin20.2-clang
-          #   bins: [pojdectl-rs]
-          #   suffix: .macos-aarch64
+          - dir: .
+            os: joseluisq/rust-linux-darwin-builder
+            arch: amd64
+            target: aarch64-apple-darwin
+            pkgs: ""
+            cc: aarch64-apple-darwin20.2-clang
+            target_cc: aarch64-apple-darwin20.2-clang -arch arm64
+            bins: [pojdectl-rs]
+            suffix: .macos-aarch64
 
     steps:
       - name: Checkout
@@ -85,7 +90,7 @@ jobs:
           sudo install /tmp/hydrun /usr/local/bin
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
-        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.target }}\" PKGS=\"${{ matrix.project.pkgs }}\" CROSS_COMPILER=\"${{ matrix.project.cc }}\" ./Hydrunfile"'
+        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.target }}\" PKGS=\"${{ matrix.project.pkgs }}\" CROSS_COMPILER=\"${{ matrix.project.cc }}\" TARGET_CC=\"${{ matrix.project.target_cc }}\" ./Hydrunfile"'
       - name: Fix permissions for output and copy to temp dir
         working-directory: ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release
         run: |
