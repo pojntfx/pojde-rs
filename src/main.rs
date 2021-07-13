@@ -289,12 +289,10 @@ pub async fn main() {
         Topics::Util(_) => todo!(),
         Topics::Misc(t) => match t.subcmd {
             MiscellaneousCommands::UpgradePojdectl(_) => {
-                // TODO: Handle errors
-                spawn_blocking(move || match update::update() {
+                match spawn_blocking(|| update::update()).await.unwrap() {
                     Ok(s) => println!("Upgrade status: `{}`", s.version()),
-                    Err(e) => println!("Could not update: {}", e),
-                })
-                .await;
+                    Err(e) => panic!("Could not update: {}", e),
+                }
             }
             MiscellaneousCommands::GetCACert(_) => todo!(),
             MiscellaneousCommands::ResetCA(_) => todo!(),
