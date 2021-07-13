@@ -1,10 +1,9 @@
-use std::env::consts;
+pub mod update;
+
 use std::str::FromStr;
 
-use clap::{crate_authors, crate_description, crate_name, crate_version, AppSettings, Clap};
-use self_update;
-
-static REPO_OWNER: &str = "pojntfx";
+use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
+use tokio::task::spawn_blocking;
 
 #[derive(Clap)]
 #[clap(
@@ -280,7 +279,8 @@ struct ResetCA {
     force: bool,
 }
 
-fn main() -> Result<(), Box<dyn (::std::error::Error)>> {
+#[tokio::main]
+pub async fn main() {
     let opts = Opts::parse();
 
     match opts.subcmd {
@@ -289,35 +289,15 @@ fn main() -> Result<(), Box<dyn (::std::error::Error)>> {
         Topics::Util(_) => todo!(),
         Topics::Misc(t) => match t.subcmd {
             MiscellaneousCommands::UpgradePojdectl(_) => {
-                let bin_suffix = match (consts::OS, consts::ARCH) {
-                    ("linux", "x86_64") => "linux-x86_64",
-                    ("linux", "aarch64") => "linux-aarch64",
-                    ("linux", "arm") => "linux-armv7l",
-                    ("linux", "riscv64") => "linux-riscv64",
-                    ("windows", "x86_64") => "exe.windows-x86_64",
-                    ("macos", "x86_64") => "macos-x86_64",
-                    ("macos", "aarch64") => "macos-aarch64",
-                    (os, arch) => panic!(
-                        "Can't upgrade, unsupported OS `{}` or architecture `{}`",
-                        os, arch
-                    ),
-                };
-
-                let status = self_update::backends::github::Update::configure()
-                    .repo_owner(REPO_OWNER)
-                    .repo_name(crate_name!())
-                    .bin_name(&(crate_name!().to_owned() + bin_suffix))
-                    .show_download_progress(true)
-                    .current_version(crate_version!())
-                    .build()?
-                    .update()?;
-
-                println!("Upgrade status: `{}`", status.version());
+                // TODO: Handle errors
+                spawn_blocking(move || match update::update() {
+                    Ok(s) => println!("Upgrade status: `{}`", s.version()),
+                    Err(e) => println!("Could not update: {}", e),
+                })
+                .await;
             }
             MiscellaneousCommands::GetCACert(_) => todo!(),
             MiscellaneousCommands::ResetCA(_) => todo!(),
         },
     }
-
-    Ok(())
 }
