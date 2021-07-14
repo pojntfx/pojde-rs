@@ -1,9 +1,14 @@
+pub mod instances;
 pub mod update;
 
 use std::str::FromStr;
 
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
+use futures::future::try_join_all;
+use shiplift::Docker;
 use tokio::task::spawn_blocking;
+
+use crate::instances::Instances;
 
 #[derive(Clap)]
 #[clap(
@@ -139,7 +144,7 @@ enum LifecycleCommands {
     setting = AppSettings::ColoredHelp,
 )]
 struct Start {
-    #[clap(about = "Name(s) of the instance(s) to start")]
+    #[clap(about = "Name(s) of the instance(s) to start", required = true)]
     names: Vec<String>,
 }
 
@@ -149,7 +154,7 @@ struct Start {
     setting = AppSettings::ColoredHelp,
 )]
 struct Stop {
-    #[clap(about = "Name(s) of the instance(s) to stop")]
+    #[clap(about = "Name(s) of the instance(s) to stop", required = true)]
     names: Vec<String>,
 }
 
@@ -159,7 +164,7 @@ struct Stop {
     setting = AppSettings::ColoredHelp,
 )]
 struct Restart {
-    #[clap(about = "Name(s) of the instance(s) to restart")]
+    #[clap(about = "Name(s) of the instance(s) to restart", required = true)]
     names: Vec<String>,
 }
 
@@ -285,12 +290,37 @@ pub async fn main() {
 
     match opts.subcmd {
         Topics::Modify(_) => todo!(),
-        Topics::Cycle(_) => todo!(),
+        Topics::Cycle(t) => {
+            let instances = Instances {
+                docker: Docker::new(),
+            };
+
+            match t.subcmd {
+                LifecycleCommands::Start(_) => todo!(),
+                LifecycleCommands::Stop(_) => todo!(),
+                LifecycleCommands::Restart(c) => {
+                    let res = try_join_all(
+                        c.names
+                            .iter()
+                            .map(|name| instances.restart(name))
+                            .collect::<Vec<_>>(),
+                    )
+                    .await;
+
+                    match res {
+                        Ok(_) => println!("Restarted {:?}", c.names),
+                        Err(e) => panic!("Could not restart {:?}: {}", c.names, e),
+                    }
+                }
+            }
+        }
         Topics::Util(_) => todo!(),
         Topics::Misc(t) => match t.subcmd {
             MiscellaneousCommands::UpgradePojdectl(_) => {
-                match spawn_blocking(|| update::update()).await.unwrap() {
-                    Ok(s) => println!("Upgrade status: `{}`", s.version()),
+                let res = spawn_blocking(|| update::update()).await;
+
+                match res {
+                    Ok(s) => println!("Upgrade status: `{}`", s.unwrap().version()),
                     Err(e) => panic!("Could not update: {}", e),
                 }
             }
