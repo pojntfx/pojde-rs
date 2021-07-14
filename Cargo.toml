@@ -21,7 +21,7 @@ shiplift = "0.7.0"
 [target.'cfg(target_os = "windows")'.dependencies]
 shiplift = { version = "0.7.0", features = ["vendored-ssl"], default-features = false }
 
-[target.'cfg(any(target_arch = "riscv64"))'.dependencies]
+[target.'cfg(target_arch = "riscv64")'.dependencies]
 shiplift = { version = "0.7.0", features = ["chrono", "unix-socket", "vendored-ssl"], default-features = false }
 
 [dev-dependencies]

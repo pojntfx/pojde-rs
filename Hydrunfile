@@ -21,7 +21,7 @@ EOT
 
 # Set up C for macOS cross-compilation
 export OSXCROSS_PKG_CONFIG_USE_NATIVE_VARIABLES=1
-export MACOSX_DEPLOYMENT_TARGET=10.7
+export MACOSX_DEPLOYMENT_TARGET=11.1
 
 # Install macOS dependencies
 if [ ! "${MACOS_PKGS}" = "" ]; then yes 1 | osxcross-macports install ${MACOS_PKGS}; fi # Don't quote `MACOS_PKGS`, it's an array!
