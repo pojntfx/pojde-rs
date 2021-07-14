@@ -12,7 +12,7 @@ license = "AGPL-3.0"
 tokio = { version = "1", features = ["full"] }
 clap = "3.0.0-beta.2"
 self_update = { version = "0.27.0", features = ["rustls"], default-features = false }
-shiplift = "0.7.0"
+shiplift = { version = "0.7.0", features = ["chrono", "unix-socket"], default-features = false }
 futures = "0.3.15"
 spinners = "1.2.0"
 ansi-escapes = "0.1.0"
