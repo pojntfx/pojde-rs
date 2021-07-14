@@ -6,6 +6,7 @@ use std::str::FromStr;
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use futures::future::try_join_all;
 use shiplift::Docker;
+use spinners::{Spinner, Spinners};
 use tokio::task::spawn_blocking;
 
 use crate::instances::Instances;
@@ -299,6 +300,11 @@ pub async fn main() {
                 LifecycleCommands::Start(_) => todo!(),
                 LifecycleCommands::Stop(_) => todo!(),
                 LifecycleCommands::Restart(c) => {
+                    let sp = Spinner::new(
+                        Spinners::Dots,
+                        format!("Restarting {:?} ...", c.names).into(),
+                    );
+
                     let res = try_join_all(
                         c.names
                             .iter()
@@ -307,8 +313,11 @@ pub async fn main() {
                     )
                     .await;
 
+                    sp.stop();
+                    print!("{}{}", ansi_escapes::CursorLeft, ansi_escapes::EraseLine);
+
                     match res {
-                        Ok(_) => println!("Restarted {:?}", c.names),
+                        Ok(_) => println!("Restarted {:?}.", c.names),
                         Err(e) => panic!("Could not restart {:?}: {}", c.names, e),
                     }
                 }
