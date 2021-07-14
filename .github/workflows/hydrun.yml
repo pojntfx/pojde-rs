@@ -130,7 +130,7 @@ jobs:
         working-directory: ${{ matrix.project.dir }}
         run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.cargo_build_target }}\" DEBIAN_ARCH=\"${{ matrix.project.debian_arch }}\" DEBIAN_PKGS=\"${{ matrix.project.debian_pkgs }}\" MACOS_PKGS=\"${{ matrix.project.macos_pkgs }}\" LINKER=\"${{ matrix.project.linker }}\" PKG_CONFIG=\"${{ matrix.project.pkg_config }}\" TARGET_CC=\"${{ matrix.project.target_cc }}\" ./Hydrunfile"'
       - name: Fix permissions for output and copy to temp dir
-        working-directory: ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release
+        working-directory: ${{ matrix.project.dir }}/target/${{ matrix.project.cargo_build_target }}/release
         run: |
           sudo chown -R $USER .
           mkdir -p /tmp/out
