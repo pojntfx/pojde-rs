@@ -367,7 +367,7 @@ pub async fn main() {
                 let res = spawn_blocking(|| update::update()).await;
 
                 match res {
-                    Ok(s) => println!("Upgrade status: `{}`", s.unwrap()),
+                    Ok(s) => println!("Upgrade status: `{}`", s.unwrap().version()),
                     Err(e) => panic!("Could not update: {}", e),
                 }
             }
