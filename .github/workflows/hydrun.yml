@@ -18,9 +18,10 @@ jobs:
 
             cargo_build_target: x86_64-unknown-linux-gnu
             debian_arch: amd64
-            debian_pkgs: libssl-dev gcc
+            debian_pkgs: libssl-dev gcc pkg-config
+            macos_pkgs: ""
             linker: x86_64-linux-gnu-gcc
-            pkg_config: pkg-config
+            pkg_config: x86_64-linux-gnu-pkg-config
             target_cc: ""
 
             bins: [pojdectl-rs]
@@ -33,6 +34,7 @@ jobs:
             cargo_build_target: aarch64-unknown-linux-gnu
             debian_arch: arm64
             debian_pkgs: libssl-dev:arm64 gcc-aarch64-linux-gnu
+            macos_pkgs: ""
             linker: aarch64-linux-gnu-gcc
             pkg_config: aarch64-linux-gnu-pkg-config
             target_cc: ""
@@ -47,6 +49,7 @@ jobs:
             cargo_build_target: armv7-unknown-linux-gnueabihf
             debian_arch: armhf
             debian_pkgs: libssl-dev:armhf gcc-arm-linux-gnueabihf
+            macos_pkgs: ""
             linker: arm-linux-gnueabihf-gcc
             pkg_config: arm-linux-gnueabihf-pkg-config
             target_cc: ""
@@ -75,6 +78,7 @@ jobs:
             cargo_build_target: x86_64-pc-windows-gnu
             debian_arch: amd64
             debian_pkgs: llvm clang gcc-mingw-w64 mingw-w64-tools # libssl-dev:amd64
+            macos_pkgs: ""
             linker: x86_64-w64-mingw32-gcc
             pkg_config: x86_64-w64-mingw32-pkg-config
             target_cc: clang
@@ -89,6 +93,7 @@ jobs:
             cargo_build_target: x86_64-apple-darwin
             debian_arch: amd64
             debian_pkgs: gcc-multilib g++-multilib # libssl-dev:amd64
+            macos_pkgs: openssl
             linker: x86_64-apple-darwin20.2-clang
             pkg_config: x86_64-apple-darwin20.2-pkg-config
             target_cc: x86_64-apple-darwin20.2-clang
@@ -102,6 +107,7 @@ jobs:
             cargo_build_target: aarch64-apple-darwin
             debian_arch: arm64
             debian_pkgs: ""
+            macos_pkgs: openssl
             linker: aarch64-apple-darwin20.2-clang
             pkg_config: aarch64-apple-darwin20.2-pkg-config
             target_cc: aarch64-apple-darwin20.2-clang -arch arm64
@@ -122,7 +128,7 @@ jobs:
           sudo install /tmp/hydrun /usr/local/bin
       - name: Build with hydrun
         working-directory: ${{ matrix.project.dir }}
-        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.cargo_build_target }}\" DEBIAN_ARCH=\"${{ matrix.project.debian_arch }}\" DEBIAN_PKGS=\"${{ matrix.project.debian_pkgs }}\" LINKER=\"${{ matrix.project.linker }}\" PKG_CONFIG=\"${{ matrix.project.pkg_config }}\" TARGET_CC=\"${{ matrix.project.target_cc }}\" ./Hydrunfile"'
+        run: hydrun -o ${{ matrix.project.os }} -a ${{ matrix.project.arch }} 'sh -c "CARGO_BUILD_TARGET=\"${{ matrix.project.cargo_build_target }}\" DEBIAN_ARCH=\"${{ matrix.project.debian_arch }}\" DEBIAN_PKGS=\"${{ matrix.project.debian_pkgs }}\" MACOS_PKGS=\"${{ matrix.project.macos_pkgs }}\" LINKER=\"${{ matrix.project.linker }}\" PKG_CONFIG=\"${{ matrix.project.pkg_config }}\" TARGET_CC=\"${{ matrix.project.target_cc }}\" ./Hydrunfile"'
       - name: Fix permissions for output and copy to temp dir
         working-directory: ${{ matrix.project.dir }}/target/${{ matrix.project.target }}/release
         run: |
