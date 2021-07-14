@@ -49,16 +49,15 @@ jobs:
             target_cc: clang
             bins: [pojdectl-rs]
             suffix: .linux-riscv64
-          # TODO: Re-enable once we figure out how to use shiplift on Windows
-          # - dir: .
-          #   os: debian
-          #   arch: amd64
-          #   target: x86_64-pc-windows-gnu
-          #   pkgs: clang llvm gcc-mingw-w64
-          #   cc: x86_64-w64-mingw32-gcc
-          #   target_cc: clang
-          #   bins: [pojdectl-rs.exe]
-          #   suffix: .windows-x86_64.exe
+          - dir: .
+            os: debian
+            arch: amd64
+            target: x86_64-pc-windows-gnu
+            pkgs: clang llvm gcc-mingw-w64
+            cc: x86_64-w64-mingw32-gcc
+            target_cc: clang
+            bins: [pojdectl-rs.exe]
+            suffix: .windows-x86_64.exe
           - dir: .
             os: joseluisq/rust-linux-darwin-builder
             arch: amd64
