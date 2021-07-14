@@ -33,7 +33,7 @@ jobs:
 
             cargo_build_target: aarch64-unknown-linux-gnu
             debian_arch: arm64
-            debian_pkgs: libssl-dev:arm64 gcc-aarch64-linux-gnu
+            debian_pkgs: libssl-dev:arm64 gcc-aarch64-linux-gnu pkg-config
             macos_pkgs: ""
             linker: aarch64-linux-gnu-gcc
             pkg_config: aarch64-linux-gnu-pkg-config
@@ -48,7 +48,7 @@ jobs:
 
             cargo_build_target: armv7-unknown-linux-gnueabihf
             debian_arch: armhf
-            debian_pkgs: libssl-dev:armhf gcc-arm-linux-gnueabihf
+            debian_pkgs: libssl-dev:armhf gcc-arm-linux-gnueabihf pkg-config
             macos_pkgs: ""
             linker: arm-linux-gnueabihf-gcc
             pkg_config: arm-linux-gnueabihf-pkg-config
