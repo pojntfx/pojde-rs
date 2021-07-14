@@ -297,8 +297,46 @@ pub async fn main() {
             };
 
             match t.subcmd {
-                LifecycleCommands::Start(_) => todo!(),
-                LifecycleCommands::Stop(_) => todo!(),
+                LifecycleCommands::Start(c) => {
+                    let sp =
+                        Spinner::new(Spinners::Dots, format!("Starting {:?} ...", c.names).into());
+
+                    let res = try_join_all(
+                        c.names
+                            .iter()
+                            .map(|name| instances.start(name))
+                            .collect::<Vec<_>>(),
+                    )
+                    .await;
+
+                    sp.stop();
+                    print!("{}{}", ansi_escapes::CursorLeft, ansi_escapes::EraseLine);
+
+                    match res {
+                        Ok(_) => println!("Started {:?}.", c.names),
+                        Err(e) => panic!("Could not start {:?}: {}", c.names, e),
+                    }
+                }
+                LifecycleCommands::Stop(c) => {
+                    let sp =
+                        Spinner::new(Spinners::Dots, format!("Stopping {:?} ...", c.names).into());
+
+                    let res = try_join_all(
+                        c.names
+                            .iter()
+                            .map(|name| instances.stop(name))
+                            .collect::<Vec<_>>(),
+                    )
+                    .await;
+
+                    sp.stop();
+                    print!("{}{}", ansi_escapes::CursorLeft, ansi_escapes::EraseLine);
+
+                    match res {
+                        Ok(_) => println!("Stopped {:?}.", c.names),
+                        Err(e) => panic!("Could not stop {:?}: {}", c.names, e),
+                    }
+                }
                 LifecycleCommands::Restart(c) => {
                     let sp = Spinner::new(
                         Spinners::Dots,
