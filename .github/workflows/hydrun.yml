@@ -39,25 +39,26 @@ jobs:
             target_cc: clang
             bins: [pojdectl-rs]
             suffix: .linux-armv7l
-          # TODO: Re-enable once Ring releases https://github.com/briansmith/ring/pull/1174
           # TODO: Switch to musl as soon as Rust releases the 2021 edition and adds a RISC-V musl target
-          # - dir: .
-          #   os: debian
-          #   arch: amd64
-          #   target: riscv64gc-unknown-linux-gnu
-          #   pkgs: gcc-riscv64-linux-gnu
-          #   cc: riscv64-linux-gnu-gcc
-          #   bins: [pojdectl-rs]
-          #   suffix: .linux-riscv64
           - dir: .
             os: debian
             arch: amd64
-            target: x86_64-pc-windows-gnu
-            pkgs: clang llvm gcc-mingw-w64
-            cc: x86_64-w64-mingw32-gcc
+            target: riscv64gc-unknown-linux-gnu
+            pkgs: gcc-riscv64-linux-gnu
+            cc: riscv64-linux-gnu-gcc
             target_cc: clang
-            bins: [pojdectl-rs.exe]
-            suffix: .windows-x86_64.exe
+            bins: [pojdectl-rs]
+            suffix: .linux-riscv64
+          # TODO: Re-enable once we figure out how to use shiplift on Windows
+          # - dir: .
+          #   os: debian
+          #   arch: amd64
+          #   target: x86_64-pc-windows-gnu
+          #   pkgs: clang llvm gcc-mingw-w64
+          #   cc: x86_64-w64-mingw32-gcc
+          #   target_cc: clang
+          #   bins: [pojdectl-rs.exe]
+          #   suffix: .windows-x86_64.exe
           - dir: .
             os: joseluisq/rust-linux-darwin-builder
             arch: amd64
