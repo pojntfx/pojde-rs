@@ -18,9 +18,9 @@ jobs:
 
             cargo_build_target: x86_64-unknown-linux-gnu
             debian_arch: amd64
-            debian_pkgs: libssl-dev:amd64 gcc
+            debian_pkgs: libssl-dev gcc
             linker: x86_64-linux-gnu-gcc
-            pkg_config: x86_64-linux-gnu-pkg-config
+            pkg_config: pkg-config
             target_cc: ""
 
             bins: [pojdectl-rs]
