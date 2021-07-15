@@ -7,7 +7,8 @@ pub struct Instances {
 }
 
 impl Instances {
-    fn get_container(self: &Self, name: &str) -> shiplift::Container<'_> {
+    // TODO: Make private once logs are integrated here
+    pub fn get_container(self: &Self, name: &str) -> shiplift::Container<'_> {
         self.docker.containers().get(POJDE_PREFIX.to_owned() + name)
     }
 
