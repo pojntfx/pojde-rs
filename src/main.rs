@@ -5,7 +5,9 @@ use std::str::FromStr;
 
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use futures::future::try_join_all;
+use futures::StreamExt;
 use shiplift::Docker;
+use shiplift::LogsOptions;
 use spinners::{Spinner, Spinners};
 use tokio::task::spawn_blocking;
 
@@ -314,7 +316,7 @@ pub async fn main() {
 
                     match res {
                         Ok(_) => println!("Started {:?}.", c.names),
-                        Err(e) => panic!("Could not start {:?}: {}", c.names, e),
+                        Err(e) => eprintln!("Could not start {:?}: {}", c.names, e),
                     }
                 }
                 LifecycleCommands::Stop(c) => {
@@ -334,7 +336,7 @@ pub async fn main() {
 
                     match res {
                         Ok(_) => println!("Stopped {:?}.", c.names),
-                        Err(e) => panic!("Could not stop {:?}: {}", c.names, e),
+                        Err(e) => eprintln!("Could not stop {:?}: {}", c.names, e),
                     }
                 }
                 LifecycleCommands::Restart(c) => {
@@ -356,19 +358,49 @@ pub async fn main() {
 
                     match res {
                         Ok(_) => println!("Restarted {:?}.", c.names),
-                        Err(e) => panic!("Could not restart {:?}: {}", c.names, e),
+                        Err(e) => eprintln!("Could not restart {:?}: {}", c.names, e),
                     }
                 }
             }
         }
-        Topics::Util(_) => todo!(),
+        Topics::Util(t) => {
+            let instances = Instances {
+                docker: Docker::new(),
+            };
+
+            match t.subcmd {
+                UtilityCommands::Logs(c) => {
+                    // TODO: Decompose to `Instances`
+                    let mut stream = instances
+                        .get_container(&c.name)
+                        .logs(&LogsOptions::builder().stdout(true).stderr(true).build());
+
+                    while let Some(log) = stream.next().await {
+                        match log {
+                            Ok(chunk) => match chunk {
+                                shiplift::tty::TtyChunk::StdOut(b) => {
+                                    print!("{}", std::str::from_utf8(&b).unwrap())
+                                }
+                                shiplift::tty::TtyChunk::StdErr(b) => {
+                                    print!("{}", std::str::from_utf8(&b).unwrap())
+                                }
+                                shiplift::tty::TtyChunk::StdIn(_) => unreachable!(),
+                            },
+                            Err(e) => eprintln!("Could not get logs: {}", e),
+                        }
+                    }
+                }
+                UtilityCommands::Enter(_) => todo!(),
+                UtilityCommands::Forward(_) => todo!(),
+            }
+        }
         Topics::Misc(t) => match t.subcmd {
             MiscellaneousCommands::UpgradePojdectl(_) => {
                 let res = spawn_blocking(|| update::update()).await;
 
                 match res {
                     Ok(s) => println!("Upgrade status: `{}`", s.unwrap().version()),
-                    Err(e) => panic!("Could not update: {}", e),
+                    Err(e) => eprintln!("Could not update: {}", e),
                 }
             }
             MiscellaneousCommands::GetCACert(_) => todo!(),
