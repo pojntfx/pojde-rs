@@ -1,6 +1,7 @@
 use shiplift::Docker;
 
-static POJDE_PREFIX: &str = "pojde-";
+// TODO: Make private once listing logic is contained here
+pub static POJDE_PREFIX: &str = "pojde-";
 
 pub struct Instances {
     pub docker: Docker,
