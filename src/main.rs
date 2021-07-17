@@ -1,13 +1,13 @@
 pub mod instances;
 pub mod update;
 
+use std::str::from_utf8;
 use std::str::FromStr;
 
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use futures::future::try_join_all;
 use futures::StreamExt;
 use shiplift::Docker;
-use shiplift::LogsOptions;
 use spinners::{Spinner, Spinners};
 use tokio::task::spawn_blocking;
 
@@ -383,19 +383,16 @@ pub async fn main() {
 
             match t.subcmd {
                 UtilityCommands::Logs(c) => {
-                    // TODO: Decompose to `Instances`
-                    let mut stream = instances
-                        .get_container(&c.name)
-                        .logs(&LogsOptions::builder().stdout(true).stderr(true).build());
+                    let mut logs = instances.get_logs(&c.name).await;
 
-                    while let Some(log) = stream.next().await {
+                    while let Some(log) = logs.next().await {
                         match log {
                             Ok(chunk) => match chunk {
                                 shiplift::tty::TtyChunk::StdOut(b) => {
-                                    print!("{}", std::str::from_utf8(&b).unwrap())
+                                    print!("{}", from_utf8(&b).unwrap())
                                 }
                                 shiplift::tty::TtyChunk::StdErr(b) => {
-                                    print!("{}", std::str::from_utf8(&b).unwrap())
+                                    print!("{}", from_utf8(&b).unwrap())
                                 }
                                 shiplift::tty::TtyChunk::StdIn(_) => unreachable!(),
                             },

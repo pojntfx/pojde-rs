@@ -1,4 +1,5 @@
-use shiplift::{ContainerFilter, ContainerListOptions, Docker};
+use futures::Stream;
+use shiplift::{tty, ContainerFilter, ContainerListOptions, Docker, Error, LogsOptions};
 
 static POJDE_PREFIX: &str = "pojde-";
 
@@ -7,8 +8,7 @@ pub struct Instances {
 }
 
 impl Instances {
-    // TODO: Make private once logs are integrated here
-    pub fn get_container(self: &Self, name: &str) -> shiplift::Container<'_> {
+    fn get_container(self: &Self, name: &str) -> shiplift::Container<'_> {
         self.docker.containers().get(POJDE_PREFIX.to_owned() + name)
     }
 
@@ -22,6 +22,14 @@ impl Instances {
 
     pub async fn restart(self: &Self, name: &str) -> Result<(), shiplift::Error> {
         self.get_container(name).restart(None).await
+    }
+
+    pub async fn get_logs(
+        self: &Self,
+        name: &str,
+    ) -> impl Stream<Item = Result<tty::TtyChunk, Error>> + '_ {
+        self.get_container(name)
+            .logs(&LogsOptions::builder().stdout(true).stderr(true).build())
     }
 
     pub async fn get_instances(self: &Self) -> Result<Vec<String>, shiplift::Error> {
