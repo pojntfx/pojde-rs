@@ -1,7 +1,6 @@
-use shiplift::Docker;
+use shiplift::{ContainerFilter, ContainerListOptions, Docker};
 
-// TODO: Make private once listing logic is contained here
-pub static POJDE_PREFIX: &str = "pojde-";
+static POJDE_PREFIX: &str = "pojde-";
 
 pub struct Instances {
     pub docker: Docker,
@@ -23,5 +22,30 @@ impl Instances {
 
     pub async fn restart(self: &Self, name: &str) -> Result<(), shiplift::Error> {
         self.get_container(name).restart(None).await
+    }
+
+    pub async fn get_instances(self: &Self) -> Result<Vec<String>, shiplift::Error> {
+        let instances = self
+            .docker
+            .containers()
+            .list(
+                &ContainerListOptions::builder()
+                    .filter(vec![ContainerFilter::Name("/".to_owned() + POJDE_PREFIX)])
+                    .build(),
+            )
+            .await;
+
+        match instances {
+            Ok(i) => Ok(i
+                .iter()
+                .map(|c| {
+                    c.names[0]
+                        .strip_prefix(&("/".to_owned() + POJDE_PREFIX))
+                        .unwrap()
+                        .to_string()
+                })
+                .collect::<Vec<_>>()),
+            Err(e) => Err(e),
+        }
     }
 }
