@@ -6,14 +6,12 @@ use std::str::FromStr;
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use futures::future::try_join_all;
 use futures::StreamExt;
-use shiplift::ContainerFilter;
 use shiplift::Docker;
 use shiplift::LogsOptions;
 use spinners::{Spinner, Spinners};
 use tokio::task::spawn_blocking;
 
 use crate::instances::Instances;
-use crate::instances::POJDE_PREFIX;
 
 #[derive(Clap)]
 #[clap(
@@ -302,24 +300,8 @@ pub async fn main() {
             match t.subcmd {
                 ModificationCommands::Apply(_) => todo!(),
                 ModificationCommands::Remove(_) => todo!(),
-                ModificationCommands::List(_) => match instances
-                    .docker
-                    .containers()
-                    .list(
-                        &shiplift::ContainerListOptions::builder()
-                            .filter(vec![ContainerFilter::Name("/".to_owned() + POJDE_PREFIX)])
-                            .build(),
-                    )
-                    .await
-                {
-                    Ok(containers) => containers.iter().for_each(|c| {
-                        println!(
-                            "{}",
-                            c.names[0]
-                                .strip_prefix(&("/".to_owned() + POJDE_PREFIX))
-                                .unwrap()
-                        )
-                    }),
+                ModificationCommands::List(_) => match instances.get_instances().await {
+                    Ok(containers) => containers.iter().for_each(|c| println!("{}", c)),
                     Err(e) => eprintln!("Could not list instances: {}", e),
                 },
             }
