@@ -7,6 +7,12 @@ pub struct Instances {
     pub docker: Docker,
 }
 
+pub struct Instance {
+    pub name: String,
+    pub start_port: u64,
+    pub end_port: u64,
+}
+
 impl Instances {
     fn get_container(self: &Self, name: &str) -> shiplift::Container<'_> {
         self.docker.containers().get(POJDE_PREFIX.to_owned() + name)
@@ -32,7 +38,7 @@ impl Instances {
             .logs(&LogsOptions::builder().stdout(true).stderr(true).build())
     }
 
-    pub async fn get_instances(self: &Self) -> Result<Vec<String>, shiplift::Error> {
+    pub async fn get_instances(self: &Self) -> Result<Vec<Instance>, shiplift::Error> {
         let instances = self
             .docker
             .containers()
@@ -47,10 +53,21 @@ impl Instances {
             Ok(i) => Ok(i
                 .iter()
                 .map(|c| {
-                    c.names[0]
-                        .strip_prefix(&("/".to_owned() + POJDE_PREFIX))
-                        .unwrap()
-                        .to_string()
+                    let mut ports = c
+                        .ports
+                        .iter()
+                        .map(|p| p.public_port.unwrap())
+                        .collect::<Vec<_>>();
+                    ports.sort();
+
+                    Instance {
+                        name: c.names[0]
+                            .strip_prefix(&("/".to_owned() + POJDE_PREFIX))
+                            .unwrap()
+                            .to_string(),
+                        start_port: *ports.first().unwrap(),
+                        end_port: *ports.last().unwrap(),
+                    }
                 })
                 .collect::<Vec<_>>()),
             Err(e) => Err(e),
