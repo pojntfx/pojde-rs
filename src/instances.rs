@@ -9,8 +9,9 @@ pub struct Instances {
 
 pub struct Instance {
     pub name: String,
-    pub start_port: u64,
-    pub end_port: u64,
+    pub start_port: Option<u64>,
+    pub end_port: Option<u64>,
+    pub status: String,
 }
 
 impl Instances {
@@ -44,6 +45,7 @@ impl Instances {
             .containers()
             .list(
                 &ContainerListOptions::builder()
+                    .all()
                     .filter(vec![ContainerFilter::Name("/".to_owned() + POJDE_PREFIX)])
                     .build(),
             )
@@ -65,8 +67,9 @@ impl Instances {
                             .strip_prefix(&("/".to_owned() + POJDE_PREFIX))
                             .unwrap()
                             .to_string(),
-                        start_port: *ports.first().unwrap(),
-                        end_port: *ports.last().unwrap(),
+                        start_port: ports.first().copied(),
+                        end_port: ports.last().copied(),
+                        status: c.state.to_owned(),
                     }
                 })
                 .collect::<Vec<_>>()),

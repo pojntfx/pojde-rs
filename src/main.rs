@@ -293,6 +293,8 @@ struct ResetCA {
 struct Instance {
     #[header("NAME")]
     name: String,
+    #[header("STATUS")]
+    status: String,
     #[header("PORTS")]
     ports: String,
 }
@@ -313,9 +315,20 @@ pub async fn main() {
                 ModificationCommands::List(_) => match instances.get_instances().await {
                     Ok(containers) => print!(
                         "{}",
-                        Table::new(containers.iter().map(|c| Instance {
-                            name: c.name.to_string(),
-                            ports: c.start_port.to_string() + "-" + &c.end_port.to_string(),
+                        Table::new(containers.iter().map(|c| {
+                            if let (Some(start_port), Some(end_port)) = (c.start_port, c.end_port) {
+                                return Instance {
+                                    name: c.name.to_owned(),
+                                    status: c.status.to_owned(),
+                                    ports: start_port.to_string() + "-" + &end_port.to_string(),
+                                };
+                            }
+
+                            Instance {
+                                name: c.name.to_owned(),
+                                status: c.status.to_owned(),
+                                ports: String::new(),
+                            }
                         }))
                         .with(Style::pseudo())
                         .to_string()
