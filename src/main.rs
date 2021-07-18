@@ -9,9 +9,11 @@ use futures::future::try_join_all;
 use futures::StreamExt;
 use shiplift::Docker;
 use spinners::{Spinner, Spinners};
+use tabled::Style;
 use tokio::task::spawn_blocking;
 
 use crate::instances::Instances;
+use tabled::{Table, Tabled};
 
 #[derive(Clap)]
 #[clap(
@@ -287,6 +289,14 @@ struct ResetCA {
     force: bool,
 }
 
+#[derive(Tabled)]
+struct Instance {
+    #[header("NAME")]
+    name: String,
+    #[header("PORTS")]
+    ports: String,
+}
+
 #[tokio::main]
 pub async fn main() {
     let opts = Opts::parse();
@@ -301,7 +311,15 @@ pub async fn main() {
                 ModificationCommands::Apply(_) => todo!(),
                 ModificationCommands::Remove(_) => todo!(),
                 ModificationCommands::List(_) => match instances.get_instances().await {
-                    Ok(containers) => containers.iter().for_each(|c| println!("{}", c)),
+                    Ok(containers) => print!(
+                        "{}",
+                        Table::new(containers.iter().map(|c| Instance {
+                            name: c.name.to_string(),
+                            ports: c.start_port.to_string() + "-" + &c.end_port.to_string(),
+                        }))
+                        .with(Style::pseudo())
+                        .to_string()
+                    ),
                     Err(e) => eprintln!("Could not list instances: {}", e),
                 },
             }
