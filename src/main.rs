@@ -431,7 +431,24 @@ pub async fn main() {
                         }
                     }
                 }
-                UtilityCommands::Enter(_) => todo!(),
+                UtilityCommands::Enter(c) => {
+                    let mut console = instances.enter(&c.name).await;
+
+                    while let Some(log) = console.next().await {
+                        match log {
+                            Ok(chunk) => match chunk {
+                                shiplift::tty::TtyChunk::StdOut(b) => {
+                                    print!("{}", from_utf8(&b).unwrap())
+                                }
+                                shiplift::tty::TtyChunk::StdErr(b) => {
+                                    print!("{}", from_utf8(&b).unwrap())
+                                }
+                                shiplift::tty::TtyChunk::StdIn(_) => unreachable!(),
+                            },
+                            Err(e) => eprintln!("Could not enter instance: {}", e),
+                        }
+                    }
+                }
                 UtilityCommands::Forward(_) => todo!(),
             }
         }
