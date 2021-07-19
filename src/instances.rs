@@ -1,5 +1,7 @@
-use futures::Stream;
-use shiplift::{tty, ContainerFilter, ContainerListOptions, Docker, Error, LogsOptions};
+use futures::{FutureExt, Stream};
+use shiplift::{
+    tty, ContainerFilter, ContainerListOptions, Docker, Error, ExecContainerOptions, LogsOptions,
+};
 
 static POJDE_PREFIX: &str = "pojde-";
 
@@ -75,5 +77,18 @@ impl Instances {
                 .collect::<Vec<_>>()),
             Err(e) => Err(e),
         }
+    }
+
+    pub async fn enter(
+        self: &Self,
+        name: &str,
+    ) -> impl Stream<Item = Result<tty::TtyChunk, Error>> + '_ {
+        self.get_container(name).exec(
+            &ExecContainerOptions::builder()
+                .cmd(vec!["uname", "-a"])
+                .attach_stdout(true)
+                .attach_stderr(true)
+                .build(),
+        )
     }
 }
