@@ -18,7 +18,7 @@ jobs:
 
             cargo_build_target: x86_64-unknown-linux-gnu
             debian_arch: amd64
-            debian_pkgs: libssl-dev gcc pkg-config libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev
+            debian_pkgs: gcc pkg-config libssl-dev python3 libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev
             macos_pkgs: ""
             linker: x86_64-linux-gnu-gcc
             pkg_config: x86_64-linux-gnu-pkg-config
@@ -33,7 +33,7 @@ jobs:
 
             cargo_build_target: aarch64-unknown-linux-gnu
             debian_arch: arm64
-            debian_pkgs: libssl-dev:arm64 libxcb-render0-dev:arm64 libxcb-shape0-dev:arm64 libxcb-xfixes0-dev:arm64 libspeechd-dev:arm64 libxkbcommon-dev:arm64 gcc-aarch64-linux-gnu pkg-config
+            debian_pkgs: libssl-dev:arm64 python3 libxcb-render0-dev:arm64 libxcb-shape0-dev:arm64 libxcb-xfixes0-dev:arm64 libspeechd-dev:arm64 libxkbcommon-dev:arm64 gcc-aarch64-linux-gnu pkg-config
             macos_pkgs: ""
             linker: aarch64-linux-gnu-gcc
             pkg_config: aarch64-linux-gnu-pkg-config
@@ -48,7 +48,7 @@ jobs:
 
             cargo_build_target: armv7-unknown-linux-gnueabihf
             debian_arch: armhf
-            debian_pkgs: libssl-dev:armhf libxcb-render0-dev:armhf libxcb-shape0-dev:armhf libxcb-xfixes0-dev:armhf libspeechd-dev:armhf libxkbcommon-dev:armhf gcc-arm-linux-gnueabihf pkg-config
+            debian_pkgs: libssl-dev:armhf python3 libxcb-render0-dev:armhf libxcb-shape0-dev:armhf libxcb-xfixes0-dev:armhf libspeechd-dev:armhf libxkbcommon-dev:armhf gcc-arm-linux-gnueabihf pkg-config
             macos_pkgs: ""
             linker: arm-linux-gnueabihf-gcc
             pkg_config: arm-linux-gnueabihf-pkg-config
@@ -63,7 +63,7 @@ jobs:
 
             cargo_build_target: riscv64gc-unknown-linux-gnu
             debian_arch: riscv64
-            debian_pkgs: gcc-riscv64-linux-gnu # libssl-dev:riscv64 libxcb-render0-dev:riscv64 libxcb-shape0-dev:riscv64 libxcb-xfixes0-dev:riscv64 libspeechd-dev:riscv64 libxkbcommon-dev:riscv64
+            debian_pkgs: gcc-riscv64-linux-gnu # libssl-dev:riscv64 python3 libxcb-render0-dev:riscv64 libxcb-shape0-dev:riscv64 libxcb-xfixes0-dev:riscv64 libspeechd-dev:riscv64 libxkbcommon-dev:riscv64
             linker: riscv64-linux-gnu-gcc
             pkg_config: riscv64-linux-gnu-pkg-config
             target_cc: ""
