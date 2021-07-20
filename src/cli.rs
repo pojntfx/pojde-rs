@@ -1,18 +1,16 @@
-pub mod instances;
-pub mod update;
-
 use std::str::from_utf8;
 use std::str::FromStr;
 
 use clap::{crate_authors, crate_description, crate_version, AppSettings, Clap};
 use futures::future::try_join_all;
 use futures::StreamExt;
+use pojdectl_rs::instances::Instances;
+use pojdectl_rs::update::update;
 use shiplift::Docker;
 use spinners::{Spinner, Spinners};
 use tabled::Style;
 use tokio::task::spawn_blocking;
 
-use crate::instances::Instances;
 use tabled::{Table, Tabled};
 
 #[derive(Clap)]
@@ -454,7 +452,7 @@ pub async fn main() {
         }
         Topics::Misc(t) => match t.subcmd {
             MiscellaneousCommands::UpgradePojdectl(_) => {
-                let res = spawn_blocking(|| update::update()).await;
+                let res = spawn_blocking(|| update()).await;
 
                 match res {
                     Ok(s) => println!("Upgrade status: `{}`", s.unwrap().version()),

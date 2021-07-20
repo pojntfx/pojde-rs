@@ -18,13 +18,13 @@ jobs:
 
             cargo_build_target: x86_64-unknown-linux-gnu
             debian_arch: amd64
-            debian_pkgs: libssl-dev gcc pkg-config
+            debian_pkgs: libssl-dev gcc pkg-config libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libspeechd-dev libxkbcommon-dev
             macos_pkgs: ""
             linker: x86_64-linux-gnu-gcc
             pkg_config: x86_64-linux-gnu-pkg-config
             target_cc: ""
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .linux-x86_64
 
           - dir: .
@@ -33,13 +33,13 @@ jobs:
 
             cargo_build_target: aarch64-unknown-linux-gnu
             debian_arch: arm64
-            debian_pkgs: libssl-dev:arm64 gcc-aarch64-linux-gnu pkg-config
+            debian_pkgs: libssl-dev:arm64 libxcb-render0-dev:arm64 libxcb-shape0-dev:arm64 libxcb-xfixes0-dev:arm64 libspeechd-dev:arm64 libxkbcommon-dev:arm64 gcc-aarch64-linux-gnu pkg-config
             macos_pkgs: ""
             linker: aarch64-linux-gnu-gcc
             pkg_config: aarch64-linux-gnu-pkg-config
             target_cc: ""
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .linux-aarch64
 
           - dir: .
@@ -48,13 +48,13 @@ jobs:
 
             cargo_build_target: armv7-unknown-linux-gnueabihf
             debian_arch: armhf
-            debian_pkgs: libssl-dev:armhf gcc-arm-linux-gnueabihf pkg-config
+            debian_pkgs: libssl-dev:armhf libxcb-render0-dev:armhf libxcb-shape0-dev:armhf libxcb-xfixes0-dev:armhf libspeechd-dev:armhf libxkbcommon-dev:armhf gcc-arm-linux-gnueabihf pkg-config
             macos_pkgs: ""
             linker: arm-linux-gnueabihf-gcc
             pkg_config: arm-linux-gnueabihf-pkg-config
             target_cc: ""
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .linux-armv7l
 
           - dir: .
@@ -63,12 +63,12 @@ jobs:
 
             cargo_build_target: riscv64gc-unknown-linux-gnu
             debian_arch: riscv64
-            debian_pkgs: gcc-riscv64-linux-gnu # libssl-dev:riscv64
+            debian_pkgs: gcc-riscv64-linux-gnu # libssl-dev:riscv64 libxcb-render0-dev:riscv64 libxcb-shape0-dev:riscv64 libxcb-xfixes0-dev:riscv64 libspeechd-dev:riscv64 libxkbcommon-dev:riscv64
             linker: riscv64-linux-gnu-gcc
             pkg_config: riscv64-linux-gnu-pkg-config
             target_cc: ""
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .linux-riscv64
 
           - dir: .
@@ -83,7 +83,7 @@ jobs:
             pkg_config: x86_64-w64-mingw32-pkg-config
             target_cc: clang
 
-            bins: [pojdectl-rs.exe]
+            bins: [pojdectl-rs.exe, pojdegui-rs.exe]
             suffix: .windows-x86_64.exe
 
           - dir: .
@@ -92,13 +92,13 @@ jobs:
 
             cargo_build_target: x86_64-apple-darwin
             debian_arch: amd64
-            debian_pkgs: gcc-multilib g++-multilib # libssl-dev:amd64
+            debian_pkgs: gcc-multilib g++-multilib
             macos_pkgs: openssl
             linker: x86_64-apple-darwin20.2-clang
             pkg_config: x86_64-apple-darwin20.2-pkg-config
             target_cc: x86_64-apple-darwin20.2-clang
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .macos-x86_64
           - dir: .
             os: joseluisq/rust-linux-darwin-builder
@@ -112,7 +112,7 @@ jobs:
             pkg_config: aarch64-apple-darwin20.2-pkg-config
             target_cc: aarch64-apple-darwin20.2-clang -arch arm64
 
-            bins: [pojdectl-rs]
+            bins: [pojdectl-rs, pojdegui-rs]
             suffix: .macos-aarch64
 
     steps:
