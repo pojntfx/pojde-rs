@@ -30,5 +30,22 @@ shiplift = { git = "https://github.com/softprops/shiplift.git", features = ["chr
 [target.'cfg(target_arch = "riscv64")'.dependencies]
 shiplift = { git = "https://github.com/softprops/shiplift.git", features = ["chrono", "unix-socket", "vendored-ssl"], default-features = false }
 
+# Use eframe on all targets except riscv64
+[target.'cfg(not(target_arch = "riscv64"))'.dependencies]
+eframe = "0.13.1"
+serde = { version = "1", features = ["derive"], optional = true }
+scopeguard = "1.1.0"
+
 [dev-dependencies]
 cargo-watch = "7.8.0"
+
+[[bin]]
+name = "pojdectl-rs"
+path = "src/cli.rs"
+
+[[bin]]
+name = "pojdegui-rs"
+path = "src/gui.rs"
+
+[lib]
+path = "src/lib.rs"

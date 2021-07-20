@@ -1,4 +1,4 @@
-use futures::{FutureExt, Stream};
+use futures::Stream;
 use shiplift::{
     tty, ContainerFilter, ContainerListOptions, Docker, Error, ExecContainerOptions, LogsOptions,
 };
