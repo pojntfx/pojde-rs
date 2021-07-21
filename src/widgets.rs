@@ -4,11 +4,43 @@ use shiplift::Docker;
 
 use crate::instances::{Instance, Instances};
 
-#[cfg_attr(feature = "persistence", derive(serde::Deserialize, serde::Serialize))]
-#[cfg_attr(feature = "persistence", serde(default))]
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)]
+pub struct SerializableInstance {
+    pub name: String,
+    pub start_port: Option<u64>,
+    pub end_port: Option<u64>,
+    pub status: String,
+}
+
+impl Default for SerializableInstance {
+    fn default() -> Self {
+        Self {
+            name: "".to_owned(),
+            start_port: Some(0),
+            end_port: Some(0),
+            status: "".to_owned(),
+        }
+    }
+}
+
+impl From<&Instance> for SerializableInstance {
+    fn from(i: &Instance) -> Self {
+        Self {
+            name: i.name.to_owned(),
+            start_port: i.start_port,
+            end_port: i.end_port,
+            status: i.status.to_owned(),
+        }
+    }
+}
+
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct Window {
-    instances: Vec<Instance>,
+    instances: Vec<SerializableInstance>,
     refreshing: bool,
+    dark: bool,
 }
 
 impl Default for Window {
@@ -16,6 +48,7 @@ impl Default for Window {
         Self {
             instances: vec![],
             refreshing: false,
+            dark: true,
         }
     }
 }
@@ -25,12 +58,15 @@ impl epi::App for Window {
         "pojdegui"
     }
 
-    #[cfg(feature = "persistence")]
-    fn load(&mut self, storage: &dyn epi::Storage) {
-        *self = epi::get_value(storage, epi::APP_KEY).unwrap_or_default()
+    fn setup(
+        &mut self,
+        _ctx: &egui::CtxRef,
+        _frame: &mut epi::Frame<'_>,
+        storage: Option<&dyn epi::Storage>,
+    ) {
+        *self = epi::get_value(storage.unwrap(), epi::APP_KEY).unwrap_or_default()
     }
 
-    #[cfg(feature = "persistence")]
     fn save(&mut self, storage: &mut dyn epi::Storage) {
         epi::set_value(storage, epi::APP_KEY, self);
     }
@@ -48,7 +84,14 @@ impl epi::App for Window {
                         frame.quit();
                     }
                 });
+
+                egui::menu::menu(ui, "Edit", |ui| {
+                    ui.checkbox(&mut self.dark, "Dark mode")
+                        .on_hover_text("Enable dark mode");
+                });
             });
+
+            self.update_dark_mode(ui);
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
@@ -88,10 +131,23 @@ impl Window {
         println!("Refreshing ...");
 
         match manager.get_instances().await {
-            Ok(containers) => s.instances = containers,
+            Ok(containers) => {
+                s.instances = containers
+                    .iter()
+                    .map(|i| SerializableInstance::from(i))
+                    .collect::<Vec<_>>()
+            }
             Err(e) => eprintln!("Could not list instances: {}", e),
         }
 
         Ok(())
+    }
+
+    fn update_dark_mode(&mut self, ui: &mut egui::Ui) {
+        if self.dark {
+            ui.ctx().set_visuals(egui::Visuals::dark());
+        } else {
+            ui.ctx().set_visuals(egui::Visuals::light());
+        }
     }
 }
