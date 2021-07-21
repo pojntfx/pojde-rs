@@ -32,8 +32,8 @@ shiplift = { git = "https://github.com/softprops/shiplift.git", features = ["chr
 
 # Use eframe on all targets except riscv64
 [target.'cfg(not(target_arch = "riscv64"))'.dependencies]
-eframe = "0.13.1"
-serde = { version = "1", features = ["derive"], optional = true }
+eframe = { version = "0.13.1", features = ["persistence"] }
+serde = { version = "1", features = ["derive"] }
 scopeguard = "1.1.0"
 
 [dev-dependencies]
