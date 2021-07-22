@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Setup Debian ports
+apt update
+apt install -y debian-ports-archive-keyring
+cat <<EOT >>/etc/apt/sources.list
+deb http://ftp.ports.debian.org/debian-ports unstable main
+deb http://ftp.ports.debian.org/debian-ports unreleased main
+deb http://ftp.ports.debian.org/debian-ports experimental main
+EOT
+
 # Install native dependencies
 dpkg --add-architecture "${DEBIAN_ARCH}"
 apt update
