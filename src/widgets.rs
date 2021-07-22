@@ -45,8 +45,13 @@ impl From<&Instance> for SerializableInstance {
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 pub struct Window {
+    #[serde(skip)]
     instances: Vec<SerializableInstance>,
+    #[serde(skip)]
     refreshing: bool,
+    #[serde(skip)]
+    manager: Option<Instances>,
+
     dark: bool,
 }
 
@@ -55,6 +60,8 @@ impl Default for Window {
         Self {
             instances: vec![],
             refreshing: false,
+            manager: None,
+
             dark: true,
         }
     }
@@ -126,6 +133,7 @@ impl epi::App for Window {
                     ui.add(Label::new("Name").strong());
                     ui.add(Label::new("Status").strong());
                     ui.add(Label::new("Ports").strong());
+                    ui.add(Label::new("Actions").strong());
 
                     ui.end_row();
 
@@ -134,6 +142,13 @@ impl epi::App for Window {
                             ui.label(i.name.to_owned());
                             ui.label(i.status.to_owned());
                             ui.monospace(start_port.to_string() + "-" + &end_port.to_string());
+
+                            ui.horizontal(|ui| {
+                                if ui.button("Stop").clicked() {
+                                    executor::block_on(self.stop_instance(&i.name.to_owned()))
+                                        .unwrap();
+                                }
+                            });
                         } else {
                             ui.label(i.name.to_owned());
                             ui.label(i.status.to_owned());
@@ -152,15 +167,22 @@ impl epi::App for Window {
 
 impl Window {
     async fn refresh_instances(&mut self) -> Result<(), ()> {
-        let manager = Instances {
-            docker: Docker::new(),
-        };
-
         let mut s = scopeguard::guard(self, |r| {
             r.refreshing = false;
         });
 
         s.refreshing = true;
+
+        let manager = match &mut s.manager {
+            Some(m) => m,
+            None => {
+                s.manager = Some(Instances {
+                    docker: Docker::new(),
+                });
+
+                s.manager.as_ref().unwrap()
+            }
+        };
 
         println!("Refreshing ...");
 
@@ -172,6 +194,16 @@ impl Window {
                     .collect::<Vec<_>>()
             }
             Err(e) => eprintln!("Could not list instances: {}", e),
+        }
+
+        Ok(())
+    }
+
+    async fn stop_instance(&self, name: &str) -> Result<(), ()> {
+        // TODO: Upsert manager by calling `refresh_instances`
+        match self.manager.as_ref().unwrap().stop(name).await {
+            Ok(_) => {}
+            Err(e) => eprintln!("Could not stop instance: {}", e),
         }
 
         Ok(())
