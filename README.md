@@ -1,6 +1,6 @@
-# pojdectl-rs
+# pojde-rs
 
-Experimental Rust implementation of https://github.com/pojntfx/pojde's `pojdectl`.
+Experimental Rust implementation of https://github.com/pojntfx/pojde.
 
 ## Overview
 
@@ -8,6 +8,6 @@ Experimental Rust implementation of https://github.com/pojntfx/pojde's `pojdectl
 
 ## License
 
-pojdectl-rs (c) 2021 Felicitas Pojtinger and contributors
+pojde-rs (c) 2021 Felicitas Pojtinger and contributors
 
 SPDX-License-Identifier: AGPL-3.0

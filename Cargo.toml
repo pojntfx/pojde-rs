@@ -1,9 +1,9 @@
 [package]
-name = "pojdectl-rs"
+name = "pojde-rs"
 version = "0.1.0"
 authors = ["Felicitas Pojtinger <felicitas@pojtinger.com>"]
 edition = "2018"
-description = "Experimental Rust implementation of https://github.com/pojntfx/pojde's `pojdectl`."
+description = "Experimental Rust implementation of https://github.com/pojntfx/pojde."
 license = "AGPL-3.0"
 resolver= "2"
 
