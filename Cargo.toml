@@ -17,24 +17,17 @@ spinners = "1.2.0"
 ansi-escapes = "0.1.0"
 self_update = "0.27.0"
 tabled = "0.2.2"
+eframe = { version = "0.13.1", features = ["persistence"] }
+serde = { version = "1", features = ["derive"] }
+scopeguard = "1.1.0"
 
-# Use default features for all systems except mingw and RISC-V
-[target.'cfg(not(any(target_os = "windows", target_arch = "riscv64")))'.dependencies]
+# Use default features for all systems except mingw
+[target.'cfg(not(target_os = "windows"))'.dependencies]
 shiplift = { git = "https://github.com/softprops/shiplift.git" } # TODO: Use non-git version once https://github.com/softprops/shiplift/pull/282 is in a release
 
 # We don't have a multiarch mingw Debian package for OpenSSL yet, so use the vendored version; also disable UNIX-only features
 [target.'cfg(target_os = "windows")'.dependencies]
 shiplift = { git = "https://github.com/softprops/shiplift.git", features = ["chrono", "vendored-ssl"], default-features = false }
-
-# We don't have a multiarch RISC-V Debian package for OpenSSL yet, so use the vendored version
-[target.'cfg(target_arch = "riscv64")'.dependencies]
-shiplift = { git = "https://github.com/softprops/shiplift.git", features = ["chrono", "unix-socket", "vendored-ssl"], default-features = false }
-
-# Use eframe on all targets except riscv64
-[target.'cfg(not(target_arch = "riscv64"))'.dependencies]
-eframe = { version = "0.13.1", features = ["persistence"] }
-serde = { version = "1", features = ["derive"] }
-scopeguard = "1.1.0"
 
 [dev-dependencies]
 cargo-watch = "7.8.0"
