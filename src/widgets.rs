@@ -1,4 +1,7 @@
-use eframe::{egui, epi};
+use eframe::{
+    egui::{self, Label},
+    epi,
+};
 use futures::executor;
 use shiplift::Docker;
 use tokio::task::spawn_blocking;
@@ -119,9 +122,27 @@ impl epi::App for Window {
             }
 
             if self.instances.len() > 0 {
-                self.instances.iter().for_each(|i| {
-                    ui.label(i.name.to_owned());
-                })
+                egui::Grid::new("instances").striped(true).show(ui, |ui| {
+                    ui.add(Label::new("Name").strong());
+                    ui.add(Label::new("Status").strong());
+                    ui.add(Label::new("Ports").strong());
+
+                    ui.end_row();
+
+                    self.instances.iter().for_each(|i| {
+                        if let (Some(start_port), Some(end_port)) = (i.start_port, i.end_port) {
+                            ui.label(i.name.to_owned());
+                            ui.label(i.status.to_owned());
+                            ui.monospace(start_port.to_string() + "-" + &end_port.to_string());
+                        } else {
+                            ui.label(i.name.to_owned());
+                            ui.label(i.status.to_owned());
+                            ui.monospace("");
+                        }
+
+                        ui.end_row();
+                    });
+                });
             }
 
             egui::warn_if_debug_build(ui);
