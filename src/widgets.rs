@@ -1,8 +1,12 @@
 use eframe::{egui, epi};
 use futures::executor;
 use shiplift::Docker;
+use tokio::task::spawn_blocking;
 
-use crate::instances::{Instance, Instances};
+use crate::{
+    instances::{Instance, Instances},
+    update::update,
+};
 
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
@@ -88,6 +92,15 @@ impl epi::App for Window {
                 egui::menu::menu(ui, "Edit", |ui| {
                     ui.checkbox(&mut self.dark, "Dark mode")
                         .on_hover_text("Enable dark mode");
+                });
+
+                egui::menu::menu(ui, "Help", |ui| {
+                    if ui.button("Check for updates").clicked() {
+                        // TODO: Handle errors and run in background
+                        executor::block_on(spawn_blocking(|| update()))
+                            .unwrap()
+                            .unwrap();
+                    }
                 });
             });
 
